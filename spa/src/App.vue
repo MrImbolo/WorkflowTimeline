@@ -1,7 +1,6 @@
 <template>
   <v-app>
-    <!-- <span class="bg"></span> -->
-    <InnerApp></InnerApp>
+      <InnerApp></InnerApp>
   </v-app>
 </template>
 

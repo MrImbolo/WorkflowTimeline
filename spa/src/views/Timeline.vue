@@ -1,27 +1,28 @@
 <template>
-  <v-navigation-drawer dark permanent :mini-variant="drawer" mini-variant-width="96" style="height: 100vh; max-height: 100vh;" width="386">
+  <v-navigation-drawer dark permanent :mini-variant="drawer" :width="isMobile ? '100%' : '300'" mini-variant-width="96" style="height: 100vh; max-height: 100vh;">
     <v-list-item class="px-0">
       <v-list-item class="px-0">
-        <!-- <v-text-field 
-        label="Search..." 
-        hide-details 
-        dense
-        v-model="search"
-        :prepend-icon="!drawer ? 'mdi-chevron-left' : 'mdi-chevron-right'"
-        @click:prepend="drawer=!drawer"
-        ></v-text-field> -->
         <v-toolbar dense flat color="transparent" :class="drawer ? 'justify-center' : '' ">
-          <v-btn icon
-            @click="drawer=!drawer">
-            <v-icon>{{!drawer ? 'mdi-chevron-left' : 'mdi-chevron-right'}}</v-icon>
+          <v-app-bar-nav-icon @click="callClearFile($event)" v-if="isMobile">
+            <v-icon>
+              mdi-arrow-left
+            </v-icon>
+          </v-app-bar-nav-icon>
+          <v-toolbar-title class="pa-0">
+            <v-text-field 
+              v-if="!drawer"
+              label="Search..." 
+              hide-details 
+              dense
+              v-model="search"
+            ></v-text-field>
+          </v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon @click.stop="drawer = !drawer" v-if="!isMobile">
+            <v-icon>
+              {{!drawer ? 'mdi-chevron-left' : 'mdi-chevron-right'}}
+            </v-icon>
           </v-btn>
-          <v-text-field 
-            v-if="!drawer"
-            label="Search..." 
-            hide-details 
-            dense
-            v-model="search"
-          ></v-text-field>
         </v-toolbar>
       </v-list-item>
     </v-list-item>
@@ -29,15 +30,20 @@
     <v-divider></v-divider>
 
     <v-timeline dense v-if="selectedFile" class="pa-0">
-        <v-timeline-item
-          small 
-          v-ripple
-          class="px-0 py-3 selectable-item"
-          :color="selectedChunk == chunk ? 'amber' : 'white'"
-          :fill-dot="!selectedChunk == chunk"
-          v-for="(chunk, i) in getVisibleChunks()"
-          :key="i"
-          @click.native="callSelectChunk($event, chunk)">
+      <v-tooltip right v-for="(chunk, i) in getVisibleChunks()" :key="i" :value="i === tooltipShown && !isMobile">
+        <template v-slot:activator="{ on, attrs }">
+          <v-timeline-item
+            v-bind="attrs"
+            v-on="on"
+            small 
+            v-ripple
+            class="px-0 py-3 selectable-item"
+            :color="selectedChunk == chunk ? 'amber' : 'white'"
+            :fill-dot="!selectedChunk == chunk"
+            @click.native="callSelectChunk($event, chunk)"
+            @mouseover.native="tooltipShown = i"
+            @mouseleave.native="tooltipShown = null"
+          >
           <v-row class="pa-0" v-if="!drawer">
             <v-col cols="4" class="pa-0">
               <small :class="selectedChunk == chunk ? 'amber--text' : 'white--text'">{{dtShorten(chunk.dt)}}</small>
@@ -49,6 +55,10 @@
             </v-col>
           </v-row>
         </v-timeline-item>
+        </template>
+        <span>{{chunk.title}}</span>
+      </v-tooltip>
+        
     </v-timeline>
     <v-card class="grow">
       <v-card-text class="py-0">
@@ -61,6 +71,7 @@ export default {
   data: () => ({
     drawer: false,
     search: '',
+    tooltipShown: null,
   }),
   methods: {
     dtShorten:(dt) => { 
@@ -80,8 +91,10 @@ export default {
   },
   props: {
     callSelectChunk: Function,
+    callClearFile: Function,
     selectedFile: Object,
-    selectedChunk: Object
+    selectedChunk: Object,
+    isMobile: Boolean
   },
 };
 </script>

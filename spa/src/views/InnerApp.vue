@@ -1,38 +1,113 @@
 <template>
-  <v-card app style="height: 100vh;" tile>
-    <v-navigation-drawer permanent width="100%">
-      <v-row fill-height no-gutters>
-        <FileMenu 
-          v-bind:callSelectFolder="selectFolder" 
-          v-bind:callSelectFile="selectFile" 
-          v-bind:selectedFolder="selectedFolder" 
-          v-bind:selectedFile="selectedFile"
-        ></FileMenu>
-        <Timeline 
-          v-bind:callSelectChunk="selectChunk" 
-          v-bind:selectedFile="selectedFile"
-          v-bind:selectedChunk="selectedChunk"
-        ></Timeline>
-        <Content v-bind:selectedChunk="selectedChunk"></Content>
-      </v-row>
-    </v-navigation-drawer>
+  <v-card app style="height: 100vh; max-height: 100vh;" tile>
+    <template>
+      <v-navigation-drawer permanent width="100%">
+        <v-row fill-height no-gutters>
+            <FileMenu 
+              v-bind:callSelectFile="selectFile" 
+              v-bind:selectedFile="selectedFile"
+              v-bind:isMobile="isMobile"
+              v-bind:files="files"
+              v-if="showFileMenu()"
+            ></FileMenu>
+            <Timeline 
+              v-bind:selectedFile="selectedFile"
+              v-bind:callClearFile="clearFile"
+              v-bind:callSelectChunk="selectChunk" 
+              v-bind:selectedChunk="selectedChunk"
+              v-bind:isMobile="isMobile"
+              v-if="showTimeline()"
+            ></Timeline>
+            <Editor 
+              v-bind:selectedChunk="selectedChunk"
+              v-bind:callClearChunk="clearChunk"
+              v-bind:isMobile="isMobile"
+              v-if="showEditor()"
+            ></Editor>
+        </v-row>
+      </v-navigation-drawer>
+    </template>
   </v-card>
 </template>
 <script>
 import FileMenu from './FileMenu.vue';
 import Timeline from "./Timeline.vue";
-import Content from "./Content.vue";
+import Editor from "./Editor.vue";
 
 export default {
   data: () => ({
-    selectedFolder: null,
     selectedFile: null,
     selectedChunk: null,
+    isMobile: false,
+    files: [
+      {
+        icon: "mdi-timeline",
+        name: "First workflow",
+        chunks: [
+          {
+            dt: 1601288262676,
+            title: "Start your work",
+            content: "Type your starting point here..."
+          },
+          {
+            dt: 1601288300000,
+            title: "Save your progress",
+            content: "Type your starting point here..."
+          },
+          {
+            dt: 1601288400000,
+            title: "Sync with git",
+            content: "Type your starting point here..."
+          },
+          {
+            dt: 1601288500000,
+            title: "Create clear summary",
+            content: "Type your starting point here..."
+          },
+          {
+            dt: 1601288600000,
+            title: "Share with teammates",
+            content: "Type your starting point here..."
+          }
+        ]
+      },
+      {
+              icon: "mdi-timeline",
+              name: "Second workflow",
+              chunks: [
+                {
+                  dt: 1601288262676,
+                  title: "Start your work",
+                  content: "Type your starting point here..."
+                },
+                {
+                  dt: 1601288300000,
+                  title: "Save your progress",
+                  content: "Type your starting point here..."
+                },
+                {
+                  dt: 1601288400000,
+                  title: "Sync with git",
+                  content: "Type your starting point here..."
+                },
+                {
+                  dt: 1601288500000,
+                  title: "Create clear summary",
+                  content: "Type your starting point here..."
+                },
+                {
+                  dt: 1601288600000,
+                  title: "Share with teammates",
+                  content: "Type your starting point here..."
+                }
+              ]
+            }
+    ]
   }),
   components: {
     FileMenu,
     Timeline,
-    Content,
+    Editor,
   },
   methods: {
     selectFile(e, file) { 
@@ -42,22 +117,33 @@ export default {
           ? null
           : file; 
     },
-    selectFolder(e, folder) {
-      // if no folder or another folder selected -> select folder, deselect file
-      if (!this.selectedFolder || this.selectedFolder != folder) { 
-        this.selectedFolder = folder;
-        this.selectedFile = null;
-      }
-      // if selection is released 
-      else { 
-        this.selectedFolder = null;
-        this.selectedFile = null;
-      }
+    clearFile() {
+      this.selectedFile = null;
     },
     selectChunk(e, chunk) {
       this.selectedChunk = chunk;
-    }
+    },
+    clearChunk() {
+      this.selectedChunk = null;
+    },
+    showFileMenu() {
+      return this.isMobile && !this.selectedFile && !this.selectedChunk || !this.isMobile;
+    },
+    showTimeline() {
+      return this.isMobile && this.selectedFile && !this.selectedChunk || !this.isMobile;
+    },
+    showEditor() {
+      return this.isMobile && this.selectedFile && this.selectedChunk || !this.isMobile;
+    },
   },
+  mounted() {
+    this.isMobile = this.$vuetify.breakpoint.smAndDown;
+  },
+  watch: {
+    '$vuetify.breakpoint.smAndDown': function(val) {
+      this.isMobile = val;
+    }
+  }
 };
 </script>
 <style lang="scss">
