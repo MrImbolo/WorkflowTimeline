@@ -19,101 +19,45 @@
           </v-icon>
         </v-text-field>
       </v-toolbar>
-      <v-card dense flat tile>
-        <v-overflow-btn
-          dense
-          :items="dropdown_font"
-          label="Select font"
-          hide-details
-          class="pa-0"
-        ></v-overflow-btn>
-        <v-overflow-btn
-          dense
-          :items="dropdown_edit"
-          editable
-          label="Select size"
-          hide-details
-          class="pa-0"
-        ></v-overflow-btn>
-
-        <v-btn-toggle
-          v-model="toggle_multiple"
-          color="primary"
-          dense
-          group
-          multiple
-        >
-          <v-btn :value="1" text>
-            <v-icon>mdi-format-bold</v-icon>
-          </v-btn>
-
-          <v-btn :value="2" text>
-            <v-icon>mdi-format-italic</v-icon>
-          </v-btn>
-
-          <v-btn :value="3" text>
-            <v-icon>mdi-format-underline</v-icon>
-          </v-btn>
-
-          <v-btn :value="4" text>
-            <v-icon>mdi-format-color-fill</v-icon>
-          </v-btn>
-        </v-btn-toggle>
-
-        <v-divider vertical></v-divider>
-
-        <v-btn-toggle v-model="toggle_exclusive" color="primary" dense group>
-          <v-btn :value="1" text>
-            <v-icon>mdi-format-align-left</v-icon>
-          </v-btn>
-
-          <v-btn :value="2" text>
-            <v-icon>mdi-format-align-center</v-icon>
-          </v-btn>
-
-          <v-btn :value="3" text>
-            <v-icon>mdi-format-align-right</v-icon>
-          </v-btn>
-
-          <v-btn :value="4" text>
-            <v-icon>mdi-format-align-justify</v-icon>
-          </v-btn>
-        </v-btn-toggle>
-      </v-card>
       <v-card-text>
-        <v-textarea
-          v-if="selectedChunk"
-          name="input-7-1"
-          no-resize
-          v-model="selectedChunk.content"
-        ></v-textarea>
+        <Editor v-model="selectedChunk.content" width="auto" height="80vh" :image-provider="imageProvider" v-if="selectedChunk" :key="selectedChunk.title" /> 
       </v-card-text>
     </v-card>
   </v-col>
 </template>
 <script>
+import Editor from '@baoshishu/vue-editor';
+
 export default {
   data: () => ({
-    dropdown_font: [
-      { text: "Arial" },
-      { text: "Calibri" },
-      { text: "Courier" },
-      { text: "Verdana" }
-    ],
-    dropdown_edit: [
-      { text: "100%" },
-      { text: "75%" },
-      { text: "50%" },
-      { text: "25%" },
-      { text: "0%" }
-    ],
-    toggle_exclusive: 2,
-    toggle_multiple: [1, 2, 3]
+    editorValue: '',
+    imageProvider: {
+        name: 'qiniu', // provider name
+        token:
+          '-qWchT63mkZEJch0ygm3bN9h3peInHqCcSAEMtvV:9YAz4dCiB3EAdYuoDVO0YvObtqY=:eyJzY29wZSI6InRlc3QiLCJkZWFkbGluZSI6MTkwMjAyODY1NX0=', // upload token
+        domain: '/', // upload domain
+        modifier: ({ width, height, url }) => {
+          height;
+          if (width < 750) {
+            return url
+          } else {
+            return `${url}?imageMogr2/thumbnail/750x/`
+          }
+        },
+      },
   }),
+  methods: {
+    forceUpdate() {
+      this.$forceUpdate();
+    }
+  },
   props: {
     selectedChunk: Object,
     callClearChunk: Function,
     isMobile: Boolean
+  },
+  components: {
+    Editor, 
   }
 };
 </script>
@@ -122,18 +66,5 @@ export default {
   & input {
     text-align: center;
   }
-}
-.toolbar-wrap {
-  // max-height: auto !important;
-  
-  & > div > div {
-    // flex-wrap: wrap;
-    // max-height: auto !important;
-    flex-shrink: 1;
-  }
-  
-  // & .combobox {
-  //   max-width: 50%;
-  // }
 }
 </style>
